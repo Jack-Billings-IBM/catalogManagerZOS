@@ -60,6 +60,7 @@ pipeline {
                 node('zOS') {
                     sh '/usr/lpp/IBM/dbb/bin/groovyz copyToPDS.groovy'
                 }
+            }
         }
     }
 }                
