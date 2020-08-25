@@ -11,11 +11,6 @@ pipeline {
         VERSION = VersionNumber projectStartDate: '2020-06-17', versionNumberString: '${BUILD_NUMBER}', versionPrefix: '1.0.', worstResultForIncrement: 'SUCCESS'
     }
     stages {
-        stage('Update Copybooks on z/OS') {
-            steps {
-                ftpPublisher alwaysPublishFromMaster: false, continueOnError: false, failOnError: true, masterNodeName: '', paramPublish: null, publishers: [[configName: 'zOS', transfers: [[asciiMode: true, cleanRemote: false, excludes: '', flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: "'DFH540.CICS.SDFHSAMP'", remoteDirectorySDF: false, removePrefix: 'copybooks', sourceFiles: 'copybooks/*']], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false]]
-            }
-        }
         stage('Ceate Service Archive Files') {
             steps {
                 writeFile file: "properties/inquireSingle.properties", text: "## CICS service provider build toolkit sample properties file for creating a service from existing language structures. \n##REQUIRED PROPERTIES (For optional properties, see below.) \nprovider=cics \nname=inquireSingle \nversion=${VERSION} \ndescription=inquireSingle \nconnectionRef=cicsConn \nprogram=DFH0XCMN \nlanguage=cobol \nprogramInterface=COMMAREA \nrequestStructure=copybooks/DFH0XCP4 \nresponseStructure=copybooks/DFH0XCP4 \n"
@@ -59,6 +54,12 @@ pipeline {
                     ''')
                 }
             }
+        }
+        stage('Update Copybooks on z/OS') {
+            steps {
+                node('zOS') {
+                    sh '/usr/lpp/IBM/dbb/bin/groovyz copyToPDS.groovy'
+                }
         }
     }
 }                
